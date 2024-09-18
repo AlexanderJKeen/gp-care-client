@@ -1,0 +1,12 @@
+.home {
+    display:flex;
+    text-align: center;
+    background-image: url(/public/images/nhs.png);
+    height: 20vh;
+    background-size:contain;
+    background-attachment: fixed;
+    background-position: center;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.4;
+  }

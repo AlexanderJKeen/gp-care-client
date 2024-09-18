@@ -1,0 +1,189 @@
+:root {
+  --nhs-blue: #005EB8;
+  --nhs-dark-blue: #003087;
+  --nhs-bright-blue: #0072CE;
+  --nhs-light-blue: #41B6E6;
+  --nhs-white: #FFFFFF;
+  --nhs-black: #231F20;
+  --nhs-grey: #425563;
+  --nhs-light-grey: #E8EDEE;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.appointment-booking {
+  display: flex;
+  min-height: 94vh;
+  background-color: var(--nhs-light-grey);
+}
+
+.left-side,
+.right-side {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--nhs-white);
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+}
+
+.left-side {
+  padding: 100px !important;
+  max-width: 35%
+}
+
+.right-side .rbc-calendar {
+  flex-grow: 1;
+  min-height: 0; 
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: var(--nhs-white);
+  padding: 25px;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 1001;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.modal-content::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--nhs-white);
+  z-index: -1;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  color: var(--nhs-blue);
+  font-size: 1.5em;
+  margin-bottom: 20px;
+}
+
+.modal-content select,
+.modal-content textarea,
+.left-side select,
+.left-side textarea {
+  width: 100%;
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid var(--nhs-light-grey);
+  border-radius: 5px;
+  font-size: 1em;
+}
+
+.modal-content select:focus,
+.modal-content textarea:focus,
+.left-side select:focus,
+.left-side textarea:focus {
+  outline: none;
+  border-color: var(--nhs-bright-blue);
+  box-shadow: 0 0 0 2px var(--nhs-light-blue);
+}
+
+.modal-buttons,
+.left-side .button-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.modal-buttons button,
+.left-side button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 25px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+.modal-buttons button:first-child,
+.left-side button.primary {
+  background-color: var(--nhs-blue);
+  color: var(--nhs-white);
+}
+
+.modal-buttons button:first-child:hover,
+.left-side button.primary:hover {
+  background-color: var(--nhs-dark-blue);
+}
+
+.modal-buttons button:last-child,
+.left-side button.secondary {
+  background-color: var(--nhs-light-grey);
+  color: var(--nhs-black);
+}
+
+.modal-buttons button:last-child:hover,
+.left-side button.secondary:hover {
+  background-color: var(--nhs-grey);
+  color: var(--nhs-white);
+}
+
+.modal-buttons button:active,
+.left-side button:active {
+  transform: scale(0.98);
+}
+
+.disabled-text {
+  color: var(--nhs-grey);
+  font-style: italic;
+  margin-bottom: 15px;
+}
+
+.rbc-calendar {
+  font-family: Arial, sans-serif;
+}
+
+.rbc-event {
+  background-color: var(--nhs-blue);
+  border: none;
+}
+
+.rbc-today {
+  background-color: var(--nhs-light-blue);
+}
+
+.rbc-active {
+  background-color: var(--nhs-dark-blue);
+}
+
+.left-side h2,
+.right-side h2 {
+  color: var(--nhs-blue);
+  font-size: 1.5em;
+  margin-bottom: 20px;
+}
+
+.left-side > div,
+.right-side > div {
+  margin-bottom: 40px;
+}
