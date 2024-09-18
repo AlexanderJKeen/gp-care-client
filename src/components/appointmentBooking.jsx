@@ -4,6 +4,7 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './appointmentBooking.css';
 import axios from 'axios';
+import EditAppointmentModal from './EditAppointmentModal.jsx';
 
 const localizer = momentLocalizer(moment);
 
@@ -92,11 +93,6 @@ const AppointmentBooking = () => {
     }
   };
 
-  const handleAppointmentSelect = (appointment) => {
-    setEditingAppointment(appointment);
-    setShowEditModal(true);
-  };
-
   const handleDoctorSelect = async (event) => {
     const index = event.target.value;
     const doctor = doctors[index];
@@ -148,26 +144,31 @@ const AppointmentBooking = () => {
   };
 
  
-  const handleAppointmentUpdate = async () => {
+  const handleAppointmentSelect = (appointment) => {
+    setEditingAppointment(appointment);
+    setShowEditModal(true);
+  };
+
+  const handleAppointmentUpdate = async (updatedAppointment) => {
     const token = localStorage.getItem('token');
 
     try {
-      const response = await axios.put(`http://localhost:3000/api/updateAppointments/${editingAppointment.AppointmentID}`, {
-        Notes: editingAppointment.Notes
+      const response = await axios.put(`http://localhost:3000/api/updateAppointments/${updatedAppointment.AppointmentID}`, {
+        Notes: updatedAppointment.Notes
       }, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      const updatedAppointment = {
-        ...editingAppointment,
+      const updatedApp = {
+        ...updatedAppointment,
         Notes: response.data.Notes
       };
 
       setAppointments(prevAppointments => 
         prevAppointments.map(app => 
-          app.AppointmentID === updatedAppointment.AppointmentID ? updatedAppointment : app
+          app.AppointmentID === updatedApp.AppointmentID ? updatedApp : app
         )
       );
 
@@ -176,39 +177,6 @@ const AppointmentBooking = () => {
     } catch (error) {
       console.error('Error updating appointment:', error);
     }
-  };
-
-  const EditAppointmentModal = () => {
-    if (!editingAppointment) return null;
-
-    return (
-      <div className="modal-overlay">
-        <div className="modal-content">
-          <h2>Edit Appointment</h2>
-          <p className="disabled-text">Date: {moment(editingAppointment.start).format('MMMM D, YYYY, h:mm a')}</p>
-          <p className="disabled-text">Doctor: Dr. {doctors.find(d => d.DoctorID === editingAppointment.DoctorID)?.LastName}</p>
-          <textarea
-            value={editingAppointment.Notes}
-            onChange={(e) => setEditingAppointment({ ...editingAppointment, Notes: e.target.value })}
-            placeholder="Appointment notes..."
-          />
-            <div>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={editingAppointment.Seen === 1}
-                  onChange={(e) => setEditingAppointment({ ...editingAppointment, Seen: e.target.checked ? 1 : 0 })}
-                />
-                Seen
-              </label>
-            </div>
-          <div className="modal-buttons">
-            <button onClick={handleAppointmentUpdate}>Update Appointment</button>
-            <button onClick={() => setShowEditModal(false)}>Cancel</button>
-          </div>
-        </div>
-      </div>
-    );
   };
 
   const eventStyleGetter = (event, start, end, isSelected) => {
@@ -328,7 +296,14 @@ const AppointmentBooking = () => {
           eventPropGetter={eventStyleGetter}
         />
       </div>
-      {showEditModal && <EditAppointmentModal />}
+      {showEditModal && (
+        <EditAppointmentModal
+          editingAppointment={editingAppointment}
+          doctors={doctors}
+          handleAppointmentUpdate={handleAppointmentUpdate}
+          handleClose={() => setShowEditModal(false)}
+        />
+      )}
     </div>
   );
 };

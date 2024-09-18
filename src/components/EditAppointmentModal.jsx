@@ -1,90 +1,51 @@
-// import React, { useState, useEffect } from 'react';
-// import PropTypes from 'prop-types';
-// import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import moment from 'moment';
+import './appointmentBooking.css';
 
-// const EditAppointmentModal = ({ editingAppointment, handleEditChange, handleAppointmentUpdate, setShowEditModal }) => {
-//   const [doctors, setDoctors] = useState([]);
-//   const [selectedDoctor, setSelectedDoctor] = useState(null);
-//   const [notes, setNotes] = useState('');
-//   const [seen, setSeen] = useState(false);
+const EditAppointmentModal = ({ editingAppointment, doctors, handleAppointmentUpdate, handleClose }) => {
+  const [notes, setNotes] = useState('');
 
-//   useEffect(() => {
-//     const fetchDoctors = async () => {
-//       try {
-//         const response = await axios.get('http://localhost:3000/api/doctors');
-//         setDoctors(response.data);
-//         const doctor = response.data.find(d => d.DoctorID === editingAppointment.DoctorID);
-//         setSelectedDoctor(doctor);
-//         setNotes(editingAppointment.Notes || '');
-//         setSeen(editingAppointment.Seen === 1);
-//       } catch (error) {
-//         console.error('Error fetching doctors:', error);
-//       }
-//     };
+  useEffect(() => {
+    if (editingAppointment) {
+      setNotes(editingAppointment.Notes);
+    }
+  }, [editingAppointment]);
 
-//     fetchDoctors();
-//   }, [editingAppointment]);
+  const handleNotesChange = (e) => {
+    setNotes(e.target.value);
+  };
 
-//   const handleSave = () => {
-//     handleEditChange('DoctorID', selectedDoctor.DoctorID);
-//     handleEditChange('Notes', notes);
-//     handleEditChange('Seen', seen ? 1 : 0);
-//     handleAppointmentUpdate();
-//   };
+  const handleUpdateClick = () => {
+    if (editingAppointment) {
+      handleAppointmentUpdate({ ...editingAppointment, Notes: notes });
+    }
+  };
 
-//   return (
-//     <div className="modal">
-//       <div className="modal-content">
-//         <span className="close" onClick={() => setShowEditModal(false)}>
-//           &times;
-//         </span>
-//         <h2>Edit Appointment</h2>
-//         <div className="form-group">
-//           <label htmlFor="doctor-select">Doctor</label>
-//           <select
-//             id="doctor-select"
-//             value={selectedDoctor ? selectedDoctor.DoctorID : ''}
-//             onChange={(e) => {
-//               const doctor = doctors.find(d => d.DoctorID === parseInt(e.target.value));
-//               setSelectedDoctor(doctor);
-//             }}
-//           >
-//             <option value="">Select a doctor</option>
-//             {doctors.map(doctor => (
-//               <option key={doctor.DoctorID} value={doctor.DoctorID}>
-//                 Dr. {doctor.LastName} - {doctor.Specialty}
-//               </option>
-//             ))}
-//           </select>
-//         </div>
-//         <div className="form-group">
-//           <label htmlFor="notes">Notes</label>
-//           <textarea
-//             id="notes"
-//             value={notes}
-//             onChange={(e) => setNotes(e.target.value)}
-//           />
-//         </div>
-//         <div className="form-group">
-//           <label htmlFor="seen">Seen</label>
-//           <input
-//             type="checkbox"
-//             id="seen"
-//             checked={seen}
-//             onChange={() => setSeen(!seen)}
-//           />
-//         </div>
-//         <button onClick={handleSave}>Save</button>
-//       </div>
-//     </div>
-//   );
-// };
+  if (!editingAppointment) return null;
 
-// EditAppointmentModal.propTypes = {
-//   editingAppointment: PropTypes.object.isRequired,
-//   handleEditChange: PropTypes.func.isRequired,
-//   handleAppointmentUpdate: PropTypes.func.isRequired,
-//   setShowEditModal: PropTypes.func.isRequired,
-// };
+  return (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <h2>Edit Appointment</h2>
+        <p className="disabled-text">
+          Date: {moment(editingAppointment.start).format('MMMM D, YYYY, h:mm a')}
+        </p>
+        <p className="disabled-text">
+          Doctor: Dr. {doctors.find(d => d.DoctorID === editingAppointment.DoctorID)?.LastName}
+        </p>
+        <textarea
+          rows='4'
+          value={notes}
+          onChange={handleNotesChange}
+          placeholder="Appointment notes..."
+        />
+        <div className="modal-buttons">
+          <button onClick={handleUpdateClick}>Update Appointment</button>
+          <button onClick={handleClose}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-// export default EditAppointmentModal;
+export default EditAppointmentModal;
