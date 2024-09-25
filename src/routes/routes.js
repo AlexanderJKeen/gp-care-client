@@ -1,5 +1,6 @@
 import Home from '../components/home';
 import AppointmentBooking from '../components/appointmentBooking';
+import Admin from '../components/Admin';
 
 const routes = [
   {
@@ -9,6 +10,10 @@ const routes = [
   {
     path: '/bookings',
     component: AppointmentBooking
+  },
+  {
+    path: '/admin',
+    component: Admin
   }
 ];
 

@@ -1,0 +1,21 @@
+.right-side .rbc-calendar {
+    flex-grow: 1;
+    min-height: 0;
+  }
+  
+  .rbc-calendar {
+    font-family: Arial, sans-serif;
+  }
+  
+  .rbc-event {
+    background-color: var(--nhs-blue);
+    border: none;
+  }
+  
+  .rbc-today {
+    background-color: var(--nhs-light-blue);
+  }
+  
+  .rbc-active {
+    background-color: var(--nhs-dark-blue);
+  }

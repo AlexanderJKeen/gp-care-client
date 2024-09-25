@@ -16,3 +16,80 @@
 .App-link {
   color: #61dafb;
 }
+
+:root {
+  --nhs-blue: #005EB8;
+  --nhs-dark-blue: #003087;
+  --nhs-bright-blue: #0072CE;
+  --nhs-light-blue: #41B6E6;
+  --nhs-white: #FFFFFF;
+  --nhs-black: #231F20;
+  --nhs-grey: #425563;
+  --nhs-light-grey: #E8EDEE;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+h2 {
+  color: var(--nhs-blue);
+  font-size: 1.5em;
+  margin-bottom: 20px;
+}
+
+select, textarea {
+  width: 100%;
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid var(--nhs-light-grey);
+  border-radius: 5px;
+  font-size: 1em;
+}
+
+select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--nhs-bright-blue);
+  box-shadow: 0 0 0 2px var(--nhs-light-blue);
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 25px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+.primary {
+  background-color: var(--nhs-blue);
+  color: var(--nhs-white);
+}
+
+.primary:hover {
+  background-color: var(--nhs-dark-blue);
+}
+
+.secondary {
+  background-color: var(--nhs-light-grey);
+  color: var(--nhs-black);
+}
+
+.secondary:hover {
+  background-color: var(--nhs-grey);
+  color: var(--nhs-white);
+}
+
+.disabled-text {
+  color: var(--nhs-grey);
+  font-style: italic;
+  margin-bottom: 15px;
+}

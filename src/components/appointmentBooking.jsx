@@ -1,12 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, momentLocalizer } from 'react-big-calendar';
-import moment from 'moment';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
+import React, { useState, useEffect } from 'react';
 import './appointmentBooking.css';
 import axios from 'axios';
 import EditAppointmentModal from './EditAppointmentModal.jsx';
-
-const localizer = momentLocalizer(moment);
+import Form from './Form.jsx';
+import Calendar from './Calendar.jsx';
 
 const AppointmentBooking = () => {
   const [appointments, setAppointments] = useState([]);
@@ -14,15 +11,13 @@ const AppointmentBooking = () => {
   const [availableDates, setAvailableDates] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [showImageUploadModal, setShowImageUploadModal] = useState(false);
   const [preferredDoctor, setPreferredDoctor] = useState(null);
   const [appointmentReason, setAppointmentReason] = useState('');
   const [patientId, setPatientId] = useState(null);
-  const [uploadedImage, setUploadedImage] = useState(null);
-  const fileInputRef = useRef(null);
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState(null);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,7 +29,7 @@ const AppointmentBooking = () => {
           axios.get('http://localhost:3000/api/doctors', {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`http://localhost:3000/api/patients/1`, {
+          axios.get(`http://localhost:3000/api/patients/${userID}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -82,6 +77,7 @@ const AppointmentBooking = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(`http://localhost:3000/api/availability/${doctorId}`, {
+        params: { patientID: patientId, doctorID: doctorId},
         headers: { Authorization: `Bearer ${token}` },
       });
       setAvailableDates(response.data.map(date => ({
@@ -101,30 +97,24 @@ const AppointmentBooking = () => {
     fetchAvailability(doctor.DoctorID);
   };
 
-  const handleImageUploadClick = () => {
-    setShowImageUploadModal(true);
-  };
-
-  const handleImageUploadModalClose = () => {
-    setShowImageUploadModal(false);
-  };
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    setUploadedImage(file);
-    setShowImageUploadModal(false);
+  const handleDateSelect = (e) => {
+    const selectedDate = new Date(e.target.value);
+    setSelectedDate(selectedDate);
+    setSelectedDoctor(
+      availableDates.find((d) => d.date.toDateString() === selectedDate.toDateString())?.doctor
+    );
   };
 
   const handleAppointmentSubmit = async () => {
     const token = localStorage.getItem('token');
+    selectedDate.setHours(17, 0, 0, 0);
 
     const response = await axios.post('http://localhost:3000/api/appointments', {
-      AppointmentDate: selectedDate.toISOString().slice(0, 10),
+      AppointmentDate: selectedDate.toISOString(),
       DoctorID: selectedDoctor.DoctorID,
       PatientID: patientId,
       STATUS: 'Scheduled',
       Notes: appointmentReason || 'Appointment',
-      Image: uploadedImage || null,
       Seen: 0,
     }, {
       headers: {
@@ -140,13 +130,6 @@ const AppointmentBooking = () => {
     setSelectedDate(null);
     setSelectedDoctor(null);
     setAppointmentReason('');
-    setUploadedImage(null);
-  };
-
- 
-  const handleAppointmentSelect = (appointment) => {
-    setEditingAppointment(appointment);
-    setShowEditModal(true);
   };
 
   const handleAppointmentUpdate = async (updatedAppointment) => {
@@ -179,6 +162,11 @@ const AppointmentBooking = () => {
     }
   };
 
+  const handleAppointmentSelect = (appointment) => {
+    setEditingAppointment(appointment);
+    setShowEditModal(true);
+  };
+
   const eventStyleGetter = (event, start, end, isSelected) => {
     let backgroundColor = event.Seen === 0 ? '#28a745' : '#007bff';
     return {
@@ -194,106 +182,26 @@ const AppointmentBooking = () => {
   };
 
   return (
-    <div className="appointment-booking">
-      <div className="left-side">
-        <div className="preferred-doctor">
-          <h3>Preferred Doctor</h3>
-          {preferredDoctor ? (
-            <p>
-              Dr. {preferredDoctor.LastName} - {preferredDoctor.Specialty}
-            </p>
-          ) : (
-            <select onChange={handleDoctorSelect}>
-              <option value="">Select a doctor</option>
-              {doctors.map((doctor, index) => (
-                <option key={doctor.DoctorID} value={index}>
-                  Dr. {doctor.LastName} - {doctor.Specialty}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
-        <div className="available-dates">
-          <h3>Available Dates</h3>
-          <div>
-            <label htmlFor="date-select">Select a date:</label>
-            <select
-              id="date-select"
-              value={selectedDate ? selectedDate.toISOString().slice(0, 10) : ''}
-              onChange={(e) => {
-                const selectedDate = new Date(e.target.value);
-                setSelectedDate(selectedDate);
-                setSelectedDoctor(
-                  availableDates.find((d) => d.date.toDateString() === selectedDate.toDateString())?.doctor
-                );
-              }}
-            >
-              <option value="">Choose a date</option>
-              {availableDates.map((availableDate, index) => (
-                <option key={index} value={availableDate.date.toISOString().slice(0, 10)}>
-                  {moment(availableDate.date).format('MMMM D, YYYY')}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <div className="notes-section">
-          <h3>Appointment Notes</h3>
-          <textarea
-            rows="4"
-            value={appointmentReason}
-            onChange={(e) => setAppointmentReason(e.target.value)}
-            placeholder="Type your notes here..."
-          />
-        </div>
-        <div className="image-upload">
-          <h3>Upload Image</h3>
-          <button onClick={handleImageUploadClick}>Upload Image</button>
-          {showImageUploadModal && (
-            <div className="modal">
-              <div className="modal-content">
-                <span className="close" onClick={handleImageUploadModalClose}>
-                  &times;
-                </span>
-                <div
-                  className="drop-zone"
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    handleImageUpload(e);
-                  }}
-                  onClick={() => fileInputRef.current.click()}
-                >
-                  {uploadedImage ? (
-                    <img src={URL.createObjectURL(uploadedImage)} alt="Uploaded" />
-                  ) : (
-                    <p>Drop or click to upload an image</p>
-                  )}
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleImageUpload}
-                    style={{ display: 'none' }}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-        <button className="submit-appointment" onClick={handleAppointmentSubmit}>
-          Submit Appointment
-        </button>
+    <div className="appointment-booking" style={{ display: 'flex', height: '90vh' }} data-testid="appointment-booking">
+      <div className="left-side" style={{ flex: '1', overflowY: 'auto' }} data-testid="left-side">
+        <Form
+          preferredDoctor={preferredDoctor}
+          doctors={doctors}
+          availableDates={availableDates}
+          selectedDate={selectedDate}
+          appointmentReason={appointmentReason}
+          onDoctorSelect={handleDoctorSelect}
+          onDateSelect={handleDateSelect}
+          onReasonChange={(e) => setAppointmentReason(e.target.value)}
+          onSubmit={handleAppointmentSubmit}
+          submitButtonText="Submit Appointment"
+        />
       </div>
-      <div className="right-side">
+      <div className="right-side" style={{ flex: '1', height: '100%' }} data-testid="right-side">
         <Calendar
-          localizer={localizer}
           events={appointments}
-          startAccessor="start"
-          titleAccessor="Notes"
-          endAccessor="end"
-          style={{ height: '100%' }}
           onSelectEvent={handleAppointmentSelect}
-          eventPropGetter={eventStyleGetter}
+          eventStyleGetter={eventStyleGetter}
         />
       </div>
       {showEditModal && (
@@ -302,6 +210,7 @@ const AppointmentBooking = () => {
           doctors={doctors}
           handleAppointmentUpdate={handleAppointmentUpdate}
           handleClose={() => setShowEditModal(false)}
+          data-testid="edit-appointment-modal"
         />
       )}
     </div>
