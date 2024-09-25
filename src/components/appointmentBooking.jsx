@@ -20,11 +20,27 @@ const AppointmentBooking = () => {
 
 
   useEffect(() => {
+    const fetchAvailability = async (doctorId) => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`http://localhost:3000/api/availability/${doctorId}`, {
+          params: { patientID: patientId, doctorID: doctorId },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setAvailableDates(response.data.map(date => ({
+          date: new Date(date),
+          doctor: doctors.find(d => d.DoctorID === doctorId),
+        })));
+      } catch (error) {
+        console.error('Error fetching availability:', error);
+      }
+    };
+  
     const fetchData = async () => {
       try {
         const userID = 1;
         const token = localStorage.getItem('token');
-
+  
         const [doctorsResponse, patientResponse] = await Promise.all([
           axios.get('http://localhost:3000/api/doctors', {
             headers: { Authorization: `Bearer ${token}` },
@@ -33,12 +49,12 @@ const AppointmentBooking = () => {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
-
+  
         setDoctors(doctorsResponse.data);
-
+  
         const patient = patientResponse.data[0];
         setPatientId(patient.PatientID);
-
+  
         const preferredDoctor = doctorsResponse.data.find(
           (doctor) => doctor.DoctorID === patient.PreferredDoctorID
         );
@@ -47,15 +63,16 @@ const AppointmentBooking = () => {
           setSelectedDoctor(preferredDoctor);
           fetchAvailability(preferredDoctor.DoctorID);
         }
-
+  
         fetchAppointments(patient.PatientID);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
-
+  
     fetchData();
   }, []);
+  
 
   const fetchAppointments = async (patientId) => {
     try {
