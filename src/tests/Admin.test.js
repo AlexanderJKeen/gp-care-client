@@ -76,9 +76,11 @@ describe('AdminPage Component', () => {
     act(() => {
       fireEvent.click(closeCalendarButton);
     });
-  
+
+    fireEvent.click(screen.getByTestId('cancel-button'));
+
     await waitFor(() => {
       expect(screen.queryByTestId('calendar-modal')).not.toBeInTheDocument();
     });
-  });
+    });
 });
