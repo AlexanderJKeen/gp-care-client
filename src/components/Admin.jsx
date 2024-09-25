@@ -11,7 +11,6 @@ const AdminPage = () => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [availableDates, setAvailableDates] = useState([]);
   const [editFormData, setEditFormData] = useState({
     doctorName: '',
     patientName: '',
@@ -45,21 +44,8 @@ const AdminPage = () => {
     }
   };
 
-  const fetchAvailableDates = async (doctorID, patientID) => {
-    try {
-      const response = await axios.get(`http://localhost:3000/api/availability/${doctorID}`, {
-        params: { doctorID, patientID }
-      });
-      setAvailableDates(response.data);
-    } catch (error) {
-      console.error('Error fetching available dates:', error);
-    }
-  };
-
-  const handleAppointmentSelect = async (appointment) => {
+  const handleAppointmentSelect = (appointment) => {
     setSelectedAppointment(appointment);
-    await fetchAvailableDates(appointment.DoctorID, appointment.PatientID);
-    console.log();
     setEditFormData({
       doctorName: appointment.DoctorName,
       patientName: appointment.PatientName,
