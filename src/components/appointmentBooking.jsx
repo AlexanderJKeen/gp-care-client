@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './appointmentBooking.css';
 import axios from 'axios';
 import EditAppointmentModal from './EditAppointmentModal.jsx';
@@ -18,29 +18,28 @@ const AppointmentBooking = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState(null);
 
+  const fetchAvailability = useCallback(async (doctorId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`http://localhost:3000/api/availability/${doctorId}`, {
+        params: { patientID: patientId, doctorID: doctorId },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAvailableDates(response.data.map(date => ({
+        date: new Date(date),
+        doctor: doctors.find(d => d.DoctorID === doctorId),
+      })));
+    } catch (error) {
+      console.error('Error fetching availability:', error);
+    }
+  }, [doctors, patientId]);
 
   useEffect(() => {
-    const fetchAvailability = async (doctorId) => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`http://localhost:3000/api/availability/${doctorId}`, {
-          params: { patientID: patientId, doctorID: doctorId },
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setAvailableDates(response.data.map(date => ({
-          date: new Date(date),
-          doctor: doctors.find(d => d.DoctorID === doctorId),
-        })));
-      } catch (error) {
-        console.error('Error fetching availability:', error);
-      }
-    };
-  
     const fetchData = async () => {
       try {
         const userID = 1;
         const token = localStorage.getItem('token');
-  
+
         const [doctorsResponse, patientResponse] = await Promise.all([
           axios.get('http://localhost:3000/api/doctors', {
             headers: { Authorization: `Bearer ${token}` },
@@ -49,30 +48,30 @@ const AppointmentBooking = () => {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
-  
+
         setDoctors(doctorsResponse.data);
-  
+
         const patient = patientResponse.data[0];
         setPatientId(patient.PatientID);
-  
+
         const preferredDoctor = doctorsResponse.data.find(
           (doctor) => doctor.DoctorID === patient.PreferredDoctorID
         );
         if (preferredDoctor) {
           setPreferredDoctor(preferredDoctor);
           setSelectedDoctor(preferredDoctor);
-          fetchAvailability(preferredDoctor.DoctorID);
+          fetchAvailability(preferredDoctor.DoctorID); // Use memoized function
         }
-  
+
         fetchAppointments(patient.PatientID);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
-  
+
     fetchData();
-  }, []);
-  
+    
+  }, [fetchAvailability, doctors, patientId]);
 
   const fetchAppointments = async (patientId) => {
     try {
@@ -90,28 +89,12 @@ const AppointmentBooking = () => {
     }
   };
 
-  const fetchAvailability = async (doctorId) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:3000/api/availability/${doctorId}`, {
-        params: { patientID: patientId, doctorID: doctorId},
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setAvailableDates(response.data.map(date => ({
-        date: new Date(date),
-        doctor: doctors.find(d => d.DoctorID === doctorId)
-      })));
-    } catch (error) {
-      console.error('Error fetching availability:', error);
-    }
-  };
-
   const handleDoctorSelect = async (event) => {
     const index = event.target.value;
     const doctor = doctors[index];
     setSelectedDoctor(doctor);
     setPreferredDoctor(doctor);
-    fetchAvailability(doctor.DoctorID);
+    fetchAvailability(doctor.DoctorID); // Call memoized fetchAvailability
   };
 
   const handleDateSelect = (e) => {
